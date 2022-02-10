@@ -3,12 +3,16 @@
 class Extract:
   """
     Has the ability to continue from where it left off.
+
     Has the ability to re-try the same poll over and over again.
+
     Has the ability to sleep and wait for the connection to come back up.
+
     Runs in a separate process from transform and load.
+
     It polls indefinitely with desired frequency the blockchain to obtain
-      the latest transactions, to identify and store the ones that are
-      concerned with the address.
+    the latest transactions, to identify and store the ones that are
+    concerned with the address.
   """
 
   def __init__(self, address, update_frequency: int):
