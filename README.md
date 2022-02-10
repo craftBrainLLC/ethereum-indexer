@@ -19,5 +19,5 @@ Currently, only supports Ethereum mainnet.
 ### TODO
 
 1. Dockerfile
-2. pre-commit linter and formatter
+2. pre-commit linter
 3. commit linter
