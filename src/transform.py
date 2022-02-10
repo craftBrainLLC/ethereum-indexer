@@ -29,9 +29,10 @@ And ``main.py`` looks like
 
 ...
 """
+from interfaces.itransform import ITransform
 
 
-class Transform:
+class Transform(ITransform):
     """
     Takes a config dict to perform its work.
     The dict must include the following information:

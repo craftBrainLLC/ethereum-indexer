@@ -1,7 +1,8 @@
 """Responsible for extracting the raw transaction data for the address"""
+from interfaces.iextract import IExtract
 
 
-class Extract:
+class Extract(IExtract):
     """
     Has the ability to continue from where it left off.
 
