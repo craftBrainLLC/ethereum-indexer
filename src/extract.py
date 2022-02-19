@@ -1,11 +1,10 @@
 """Responsible for extracting the raw transaction data for the address"""
 from typing import List
 import time
+import logging
 
 from interfaces.iextract import IExtract
-
-# TODO: how to document python code inside of the docs. Extract class's python
-# is not rendered properly in VSCode
+from load import Load
 
 
 class Extract(IExtract):
@@ -16,24 +15,6 @@ class Extract(IExtract):
 
     The said transactions are stored in memory until loader takes them
     and writes to the db. Upon successful write, they are removed from memory.
-
-    To avoid having cross-process communication between loader and extract,
-    we introduce an interface that supports writing to db. Extract adheres
-    to this interface, and so load supports such interfaces. Therefore,
-    we simply require each implementation of the writing to db interface
-    to have its own instance of a loader. For example,
-
-        ```python
-        EVERY_10_SECONDS = 10
-        EVERY_20_SECONDS = 20
-
-        extract = Extract(['0x', '0x'], [EVERY_10_SECONDS, EVERY_20_SECONDS])
-        load = Load(extract)
-
-        transform = Transform(...)
-        load = Load(transform)
-        ```
-
     """
 
     def __init__(self, address: List[str], update_frequency: List[int]):
@@ -51,13 +32,15 @@ class Extract(IExtract):
         self._address: List[str] = self._strandardise_address(address)
         self._update_frequency: List[int] = update_frequency
 
+        self._load = Load()
+
     def _validate_address(self, address: List[str]):
         """
         Raises if any address is invalid.
         """
         ...
 
-    def _validate_update_frequency(update_frequency: List[int]):
+    def _validate_update_frequency(self, update_frequency: List[int]):
         """
         Raises if any update frequency is invalid.
         """
@@ -71,5 +54,23 @@ class Extract(IExtract):
 
     def __call__(self):
         while True:
-            print("extracting")
+            logging.debug("extracting")
+            self._load()
             time.sleep(1)
+
+    def continue_where_left_off(self):
+        """After downloading all the raw transaction data, this function
+        gets called to continue from the last point it left off"""
+        ...
+
+    def retry_poll(self):
+        """Retries the poll untill it succeeds"""
+        ...
+
+    def is_connected_to_internet(self):
+        """Determines if connected to Internet"""
+        ...
+
+    def wait_for_internet_connection(self):
+        """Waits for Internet connection to go back up"""
+        ...

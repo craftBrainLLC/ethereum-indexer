@@ -29,9 +29,11 @@ And ``main.py`` looks like
 
 ...
 """
+import logging
 import time
 
 from interfaces.itransform import ITransform
+from load import Load
 
 
 class Transform(ITransform):
@@ -47,7 +49,7 @@ class Transform(ITransform):
     """
 
     def __init__(self):
-        ...
+        self._load = Load()
 
     def __call__(self):
         """
@@ -56,5 +58,6 @@ class Transform(ITransform):
         continue working on the ones that are in the database.
         """
         while True:
-            print("transforming")
+            logging.debug("transforming")
+            self._load()
             time.sleep(1)
