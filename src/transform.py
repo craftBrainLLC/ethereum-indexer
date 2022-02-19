@@ -16,10 +16,10 @@ src
  |transformers
  |  |
  |  |rumble-kong-league-0.0.1
- |  | |
- |  | |main.py
- |  | |config.json
- |  | |
+ |  |  |
+ |  |  |main.py
+ |  |  |config.json
+ |  |  |
 
 Where ``config.json`` looks like
 
