@@ -4,7 +4,6 @@ import logging
 
 from extract import Extract
 from transform import Transform
-from load import Load
 
 SECOND = 1
 
