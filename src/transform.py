@@ -40,10 +40,17 @@ class Transform(ITransform):
     Like extract, it runs indefinitely. It checks the database
       every 5 seconds to see if there are any new transactions
       that require transforming.
+    No need to provide any paths, since it will look for
+    required filed in `transformers` folder.
     """
 
     def __init__(self):
         ...
 
     def __call__(self):
+        """
+        Before transforming, ensure that configs' addresses are all
+        in the database. If they are not, produce soft warning and
+        continue working on the ones that are in the database.
+        """
         ...
