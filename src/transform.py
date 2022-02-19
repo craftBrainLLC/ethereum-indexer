@@ -29,6 +29,8 @@ And ``main.py`` looks like
 
 ...
 """
+import time
+
 from interfaces.itransform import ITransform
 
 
@@ -53,4 +55,6 @@ class Transform(ITransform):
         in the database. If they are not, produce soft warning and
         continue working on the ones that are in the database.
         """
-        ...
+        while True:
+            print("transforming")
+            time.sleep(1)

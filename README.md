@@ -21,3 +21,4 @@ In our implementation, we choose [Covalent](https://www.covalenthq.com/) as the 
 1. Dockerfile
 2. pre-commit linter
 3. commit linter
+4. remove web3 dep. just use their utility functions instead

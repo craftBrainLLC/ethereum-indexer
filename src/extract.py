@@ -1,5 +1,6 @@
 """Responsible for extracting the raw transaction data for the address"""
 from typing import List
+import time
 
 from interfaces.iextract import IExtract
 
@@ -69,4 +70,6 @@ class Extract(IExtract):
         ...
 
     def __call__(self):
-        ...
+        while True:
+            print("extracting")
+            time.sleep(1)
