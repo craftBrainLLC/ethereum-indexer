@@ -1,7 +1,6 @@
 """Responsible for extracting the raw transaction data for the address"""
 from typing import List
 import time
-import logging
 
 from interfaces.iextract import IExtract
 from load import Load
@@ -52,25 +51,13 @@ class Extract(IExtract):
         """
         ...
 
-    def __call__(self):
-        while True:
-            logging.debug("extracting")
-            self._load()
-            time.sleep(1)
-
-    def continue_where_left_off(self):
-        """After downloading all the raw transaction data, this function
-        gets called to continue from the last point it left off"""
-        ...
-
-    def retry_poll(self):
-        """Retries the poll untill it succeeds"""
-        ...
-
-    def is_connected_to_internet(self):
+    def is_connected_to_internet(self) -> bool:
         """Determines if connected to Internet"""
-        ...
+        return True
 
-    def wait_for_internet_connection(self):
-        """Waits for Internet connection to go back up"""
-        ...
+    def flush(self):
+        return
+
+    def extract(self):
+        time.sleep(1)
+        return
