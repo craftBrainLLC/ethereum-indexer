@@ -1,21 +1,11 @@
-"""Responsible for extracting the raw transaction data for the address"""
 from typing import List
 import time
 
 from interfaces.iextract import IExtract
-from load import Load
+from load.main import Load
 
 
 class Extract(IExtract):
-    """
-    The job of extractor is to extract all the historical raw transaction
-    data pertaining to an address and check for any new transactions
-    concerning the said addresses every update_frequency.
-
-    The said transactions are stored in memory until loader takes them
-    and writes to the db. Upon successful write, they are removed from memory.
-    """
-
     def __init__(self, address: List[str], update_frequency: List[int]):
         """
         @param address: list of addresses for which to extract the raw historical
@@ -33,31 +23,35 @@ class Extract(IExtract):
 
         self._load = Load()
 
-    def _validate_address(self, address: List[str]):
+    def _validate_address(self, address: List[str]) -> None:
         """
+        @param address:
+
         Raises if any address is invalid.
         """
         ...
 
-    def _validate_update_frequency(self, update_frequency: List[int]):
+    def _validate_update_frequency(self, update_frequency: List[int]) -> None:
         """
+        @param update_frequency:
+
         Raises if any update frequency is invalid.
         """
         ...
 
     def _strandardise_address(self, address: List[str]) -> List[str]:
         """
+        @param address:
+
         Standardises the address as per ...
         """
         ...
 
-    def is_connected_to_internet(self) -> bool:
-        """Determines if connected to Internet"""
-        return True
+    # Interface Implementation
 
-    def flush(self):
+    def flush(self) -> None:
         return
 
-    def extract(self):
+    def extract(self) -> None:
         time.sleep(1)
         return

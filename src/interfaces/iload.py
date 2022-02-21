@@ -5,4 +5,10 @@ import abc
 
 
 class ILoad(metaclass=abc.ABCMeta):
-    ...
+    @classmethod
+    def __subclasshook__(cls, subclass):
+        return hasattr(subclass, "load") and callable(subclass.load) or NotImplemented
+
+    @abc.abstractmethod
+    def load(self) -> bool:
+        raise NotImplementedError

@@ -22,20 +22,40 @@ class IDB(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def put_item(self, item: Dict, database_name: str, collection_name: str):
-        """Load in the data set"""
+        """
+        Load in the data set
+        @param item:
+        @param database_name:
+        @param collection_name:
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def put_items(self, items: List[Dict], database_name: str, collection_name: str):
-        """Extract text from the data set"""
+        """
+        Extract text from the data set
+        @param items:
+        @param database_name:
+        @param collection_name:
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_item(self, id: str, database_name: str, collection_name: str):
-        """Load in the data set"""
+        """
+        Load in the data set
+        @param id:
+        @param database_name:
+        @param collection_name:
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_items(self, ids: List[str], database_name: str, collection_name: str):
-        """Load in the data set"""
+        """
+        Load in the data set
+        @param ids:
+        @param database_name:
+        @param collection_name:
+        """
         raise NotImplementedError

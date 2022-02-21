@@ -2,8 +2,8 @@
 from multiprocessing import Process
 import logging
 
-from extract import Extract
-from transform import Transform
+from extract.extract import Extract
+from transform.transform import Transform
 
 SECOND = 1
 

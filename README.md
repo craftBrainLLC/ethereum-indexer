@@ -16,6 +16,10 @@ Currently, only supports Ethereum mainnet.
 
 In our implementation, we choose [Covalent](https://www.covalenthq.com/) as the source of historical transactions pertaining to an address. The infrastructure of this code heavily depends on implementing interfaces, thus is very modular and developers can choose to remove this dependency in their extractors.
 
+## Conventions
+
+Interfaces are first described before implementation to enforce modularity. All interface functions are described and this description is avoided in implementations.
+
 ### TODO
 
 1. Dockerfile
