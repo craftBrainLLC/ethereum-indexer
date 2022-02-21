@@ -8,6 +8,8 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"
 eth-utils = "^2.0.0"
+pymongo = "^4.0.1"
+pysha3 = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

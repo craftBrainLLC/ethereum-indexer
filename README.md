@@ -20,6 +20,14 @@ In our implementation, we choose [Covalent](https://www.covalenthq.com/) as the 
 
 Interfaces are first described before implementation to enforce modularity. All interface functions are described and this description is avoided in implementations.
 
+## Tests
+
+In `src`, run
+
+`python -m pytest tests`
+
+This should be ran in your `poetry` environment. To drop into poetry environment, first run `poetry install`, and then `poetry shell`. You might need to change your python version to `3.9` for it to install the virtual environment for you.
+
 ### TODO
 
 1. Dockerfile

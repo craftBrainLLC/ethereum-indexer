@@ -8,7 +8,7 @@ from utils.address import validate_address
 
 
 class Extract(IExtract):
-    def __init__(self, address: List[str], update_frequency: List[int]):
+    def __init__(self, address: List[str]):
         """
         @param address: list of addresses for which to extract the raw historical
         transaction data.
@@ -18,35 +18,20 @@ class Extract(IExtract):
         # Validate the addresses. https://github.com/ethereum/web3.py/blob/71ef3cd7edc299be64a8767c2a354a56c552555c/tests/core/utilities/test_validation.py#L11
         # Store the address
         self._validate_address(address)
-        self._validate_update_frequency(update_frequency)
 
         self._address: List[str] = address
-        self._update_frequency: List[int] = update_frequency
 
         self._load = Load()
 
     def _validate_address(self, address: List[str]) -> None:
         """
-        @param address:
+        @param address: address which to validate. Should be checksum correct.
 
         Raises if any address is invalid.
         """
         for a in address:
             validate_address(a)
-
         # todo: ensure there are no duplicates
-
-    def _validate_update_frequency(self, update_frequency: List[int]) -> None:
-        """
-        @param update_frequency:
-
-        Raises if any update frequency is invalid.
-        """
-        for frequency in update_frequency:
-            if frequency < 0:
-                raise ValueError("Update frequency must be in seconds and be positive.")
-
-        # ? anything else
 
     # re-setting _address is not allowed
     # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
@@ -64,10 +49,15 @@ class Extract(IExtract):
         return
 
     def extract(self) -> None:
+        # * extracts transactions for all self._address
 
         COVALENT_TRANSACTIONS_URI = (
             lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
         )
 
-        time.sleep(1)
+        # check if the db has transactions, if it has, then download the new ones
+        # if it doesn't have any transactions, download all
+        for addr in self._address:
+            ...
+
         return

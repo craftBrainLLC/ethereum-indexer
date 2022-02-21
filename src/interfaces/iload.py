@@ -10,5 +10,5 @@ class ILoad(metaclass=abc.ABCMeta):
         return hasattr(subclass, "load") and callable(subclass.load) or NotImplemented
 
     @abc.abstractmethod
-    def load(self) -> bool:
+    def load(self) -> None:
         raise NotImplementedError
