@@ -33,6 +33,22 @@ class Extract(IExtract):
         self._db = DB()
         self._load = Load()
 
+    def __setattr__(self, key, value):
+        # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
+
+        # re-setting the _address, _db_name, _db, _load is not allowed
+        forbid_reset_on = ["_address", "_db_name", "_db", "_load"]
+        for k in forbid_reset_on:
+            if key == k and hasattr(self, k):
+                raise AttributeError(
+                    "The value of the address attribute has already been set, and can not be re-set."
+                )
+
+        if key == "_block_height":
+            self.__dict__[key] = int(value)
+
+        self.__dict__[key] = value
+
     def _validate_address(self, address: List[str]) -> None:
         """
         @param address: address which to validate. Should be checksum correct.
@@ -72,19 +88,6 @@ class Extract(IExtract):
                 continue
 
             self._block_height[i] = block_height
-
-    # re-setting _address is not allowed
-    # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
-    def __setattr__(self, key, value):
-        if key == "_address" and hasattr(self, "_address"):
-            raise AttributeError(
-                "The value of the address attribute has already been set, and can not be re-set."
-            )
-
-        if key == "_block_height":
-            self.__dict__[key] = int(value)
-
-        self.__dict__[key] = value
 
     # Interface Implementation
 
