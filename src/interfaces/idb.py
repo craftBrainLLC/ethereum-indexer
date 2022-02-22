@@ -60,6 +60,9 @@ class IDB(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_all_items(self, database_name: str, collection_name: str) -> List[Any]:
+        raise NotImplementedError
+
     def get_any_item(self, database_name: str, collection_name: str) -> Any:
         """
         Gets any item from a collection.
@@ -71,11 +74,8 @@ class IDB(metaclass=abc.ABCMeta):
         @param database_name:
         @param collection_name:
         """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_all_items(self, database_name: str, collection_name: str) -> List[Any]:
-        raise NotImplementedError
+        all_items = self.get_all_items(database_name, collection_name)
+        return all_items[0]
 
     def get_items(
         self, ids: List[str], database_name: str, collection_name: str

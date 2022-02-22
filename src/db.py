@@ -12,7 +12,10 @@ class DB(IDB):
         db = self.client[table_name]
         db[collection_name].replace_one({"_id": item["_id"]}, item, upsert=True)
 
-    def get_item(self, id: str, table_name: str, collection_name: str) -> List[Any]:
-        ...
-        # db = self.client[table_name]
-        # return list(db[collection_name].find({}))
+    def get_item(self, id: str, table_name: str, collection_name: str) -> Any:
+        db = self.client[table_name]
+        return db[collection_name].find({"_id": id})
+
+    def get_all_items(self, table_name: str, collection_name: str) -> List[Any]:
+        db = self.client[table_name]
+        return list(db[collection_name]).find({})
