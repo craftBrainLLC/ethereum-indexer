@@ -121,8 +121,40 @@ class Extract(IExtract):
         self._db.put_item(item, self._db_name, collection_name)
 
     # todo: return type here
-    def _request_transactions(self, for_address: str) -> Any:
-        ...
+    def _request_transactions(self, for_address: str, page_number: int) -> Any:
+        """
+        Response looks like this
+            "data": {
+                "address": "0x94d8f036a0fbc216bb532d33bdf6564157af0cd7",
+                "updated_at": "2022-02-22T12:29:52.068887528Z",
+                "next_update_at": "2022-02-22T12:34:52.068887688Z",
+                "quote_currency": "USD",
+                "chain_id": 1,
+                "items": [<transaction>, ...],
+                "pagination": {
+                    "has_more": true,
+                    "page_number": 0,
+                    "page_size": 100,
+                    "total_count": null
+                },
+                "error": false,
+                "error_message": null,
+                "error_code": null
+            }
+
+        Args:
+            for_address (str): _description_
+            page_number (int): _description_
+
+        Returns:
+            Any: _description_
+        """
+        request_uri = COVALENT_TRANSACTIONS_URI(for_address, page_number)
+
+        # todo: check the status code
+        response = requests.get(request_uri)
+
+        return response
 
     def _extract_txn_history_since(self, block_height: int, for_address: str) -> None:
         """
