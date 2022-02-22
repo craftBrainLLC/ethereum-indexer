@@ -19,3 +19,13 @@ class DB(IDB):
     def get_all_items(self, table_name: str, collection_name: str) -> List[Any]:
         db = self.client[table_name]
         return list(db[collection_name]).find({})
+
+    def get_any_item(self, table_name: str, collection_name: str) -> Any:
+        """
+        MongoDB will return an empty list is collection does not exist
+        """
+        all_items = self.get_all_items(table_name, collection_name)
+        if len(all_items) == 0:
+            return None
+        else:
+            return all_items[0]

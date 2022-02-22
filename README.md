@@ -34,3 +34,4 @@ This should be ran in your `poetry` environment. To drop into poetry environment
 2. pre-commit linter
 3. commit linter
 4. remove web3 dep. just use their utility functions instead
+5. back ups

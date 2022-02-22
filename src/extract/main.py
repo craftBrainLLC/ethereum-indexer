@@ -4,9 +4,12 @@ import os
 from interfaces.iextract import IExtract
 from load.main import Load
 from utils.address import validate_address
+from utils.misc import remove_duplicates
 from db import DB
 
-Timestamp = TypeVar("Timestamp", int)
+# todo: eventually would want each extractor running in its own process
+# for now the solution around that would be to simply run this pipeline
+# multiple times
 
 
 class Extract(IExtract):
@@ -22,11 +25,8 @@ class Extract(IExtract):
         self._validate_address(address)
 
         self._address: List[str] = address
-        # gives timestamp up to which the extraction of the address is valid
-        # if this is 1645534244, then our data is only relevant up to
-        # 2/22/2022 12:51 UTC. It is a list because each address will have
-        # its unique value
-        self._valid_up_to: List[Timestamp] = [0 for _ in self._address]
+        # block number up to which the extraction has happened
+        self._block_height: List[int] = [0 for _ in self._address]
 
         self._db_name = "ethereum-indexer"
 
@@ -37,29 +37,41 @@ class Extract(IExtract):
         """
         @param address: address which to validate. Should be checksum correct.
 
-        Raises if any address is invalid.
+        Raises `exceptions.InvalidAddress` if any address is invalid.
+        Raises `ValueError` if there are duplicate addresses.
         """
         for a in address:
             validate_address(a)
-        # todo: ensure there are no duplicates
 
-    def _get_valid_up_to_collection_name(self, address: str) -> str:
-        return f"{address}-valid-up-to"
+        # * ensures there are no duplicate addresses
+        # * note that if multiple instances of the pipeline
+        # are running with duplicate addresses, that **will**
+        # cause errors
+        without_dupes = remove_duplicates(address)
+        if len(without_dupes) != len(address):
+            raise ValueError("There can't be duplicates in address", address)
 
-    def _update_valid_up_to(self) -> None:
+    def _get_block_height_collection_name(self, address: str) -> str:
+        return f"{address}-block-height"
+
+    def _determine_block_height(self) -> None:
         """
-        Goes through each address and determines its `valid_up_to` value.
+        Goes through each address and determines its `block_height` value.
         This ensures we do not extract all the data all the time, but only
         the new stuff. This is also helpful in case the binary raises and
         we need to restart it.
         """
-        for addr in self._address:
-            # ! what happens if the collection does not exist?
-            valid_up_to = self._db.get_any_item(
-                self._db_name, self._get_valid_up_to_collection_name(addr)
+        for i, addr in enumerate(self._address):
+            block_height = self._db.get_any_item(
+                self._db_name, self._get_block_height_collection_name(addr)
             )
-            # ! needs parsing into timestamp
-            self._valid_up_to = valid_up_to
+            # If it is None, then we have already set it to 0 in the
+            # __init__. This will signal the extractor to extract
+            # the complete history of the address
+            if block_height is None:
+                continue
+
+            self._block_height[i] = block_height
 
     # re-setting _address is not allowed
     # https://towardsdatascience.com/how-to-create-read-only-and-deletion-proof-attributes-in-your-python-classes-b34cd1019c2d
@@ -68,7 +80,10 @@ class Extract(IExtract):
             raise AttributeError(
                 "The value of the address attribute has already been set, and can not be re-set."
             )
-        # * might even do type casting for some keys like in the example link
+
+        if key == "_block_height":
+            self.__dict__[key] = int(value)
+
         self.__dict__[key] = value
 
     # Interface Implementation
@@ -80,6 +95,10 @@ class Extract(IExtract):
         """
         Extracts transactions for all self._address
         """
+
+        # Running this ensures we know what transactions to extract in the code
+        # will follow. This avoids extracting all the transactions all the time.
+        self._determine_block_height()
 
         # * notes
         # - possible to pull from a different blockchain if `chain_id` is different
