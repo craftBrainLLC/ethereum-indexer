@@ -1,4 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Any
+import requests
+import logging
 import os
 
 from interfaces.iextract import IExtract
@@ -15,15 +17,17 @@ from db import DB
 # - possible to pull from a different blockchain if `chain_id` is different
 # - `block_signed_at=false` pulls all transactions putting most recent ones
 # at the top
-COVALENT_TRANSACTIONS_URI = lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
+COVALENT_TRANSACTIONS_URI = (
+    lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
+)
+
 
 class Extract(IExtract):
     def __init__(self, address: List[str]):
         """
-        @param address: list of addresses for which to extract the raw historical
+        Args:
+            address (List[str]): list of addresses for which to extract the raw historical
         transaction data.
-        @param update_frequency: list of update frequencies for each of the
-        addresses supplied.
         """
         # Validate the addresses. https://github.com/ethereum/web3.py/blob/71ef3cd7edc299be64a8767c2a354a56c552555c/tests/core/utilities/test_validation.py#L11
         # Store the address
@@ -57,12 +61,16 @@ class Extract(IExtract):
         self.__dict__[key] = value
 
     def _validate_address(self, address: List[str]) -> None:
-        """
-        @param address: address which to validate. Should be checksum correct.
+        """_summary_
 
-        Raises `exceptions.InvalidAddress` if any address is invalid.
-        Raises `ValueError` if there are duplicate addresses.
+        Args:
+            address (List[str]): _description_
+
+        Raises:
+            InvalidAddress: _description_
+            ValueError: _description_
         """
+
         for a in address:
             validate_address(a)
 
@@ -71,6 +79,7 @@ class Extract(IExtract):
         # are running with duplicate addresses, that **will**
         # cause errors
         without_dupes = remove_duplicates(address)
+
         if len(without_dupes) != len(address):
             raise ValueError("There can't be duplicates in address", address)
 
@@ -84,6 +93,7 @@ class Extract(IExtract):
         the new stuff. This is also helpful in case the binary raises and
         we need to restart it.
         """
+
         for addr in self._address:
             block_height = self._db.get_any_item(
                 self._db_name, self._get_block_height_collection_name(addr)
@@ -97,31 +107,39 @@ class Extract(IExtract):
             self._block_height[addr] = block_height
 
     def _update_block_height(self, new_block_height: int, for_address: str) -> None:
-      """
-      After extracting the transactions update the db with the latest block height.
+        """
+        After extracting the transactions update the db with the latest block height.
 
-      Args:
-          new_block_height (int): _description_
-          for_address (str): _description_
-      """
-      collection_name = self._get_block_height_collection_name(for_address)
-      # _id: 1, because we are only ever storing single block_height value per address
-      item = {'_id': 1, 'block_height': new_block_height}
-      self._db.put_item(item, self._db_name, collection_name)
+        Args:
+            new_block_height (int): _description_
+            for_address (str): _description_
+        """
+
+        collection_name = self._get_block_height_collection_name(for_address)
+        # _id: 1, because we are only ever storing single block_height value per address
+        item = {"_id": 1, "block_height": new_block_height}
+        self._db.put_item(item, self._db_name, collection_name)
+
+    # todo: return type here
+    def _request_transactions(self, for_address: str) -> Any:
+        ...
 
     def _extract_txn_history_since(self, block_height: int, for_address: str) -> None:
-      """
-      Makes requests to Covalent, and only extracts transactions after `block_height`
+        """
+        Makes requests to Covalent, and only extracts transactions after `block_height`
 
-      Args:
-          block_height (int): _description_
-          for_address (str): _description_
-      """
-      latest_block_height = -1
+        Args:
+            block_height (int): _description_
+            for_address (str): _description_
+        """
 
-      # todo: new_block_height
-      new_block_height = 1
-      self._update_block_height(new_block_height, for_address)
+        logging.info(f"[EXTRACTING] {for_address} since block: {block_height}")
+
+        latest_block_height = -1
+
+        # todo: new_block_height
+        new_block_height = 1
+        self._update_block_height(new_block_height, for_address)
 
     # Interface Implementation
 
