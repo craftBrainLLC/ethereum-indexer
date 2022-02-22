@@ -11,6 +11,11 @@ from db import DB
 # for now the solution around that would be to simply run this pipeline
 # multiple times
 
+# * notes
+# - possible to pull from a different blockchain if `chain_id` is different
+# - `block_signed_at=false` pulls all transactions putting most recent ones
+# at the top
+COVALENT_TRANSACTIONS_URI = lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
 
 class Extract(IExtract):
     def __init__(self, address: List[str]):
@@ -91,6 +96,33 @@ class Extract(IExtract):
 
             self._block_height[addr] = block_height
 
+    def _update_block_height(self, new_block_height: int, for_address: str) -> None:
+      """
+      After extracting the transactions update the db with the latest block height.
+
+      Args:
+          new_block_height (int): _description_
+          for_address (str): _description_
+      """
+      collection_name = self._get_block_height_collection_name(for_address)
+      # _id: 1, because we are only ever storing single block_height value per address
+      item = {'_id': 1, 'block_height': new_block_height}
+      self._db.put_item(item, self._db_name, collection_name)
+
+    def _extract_txn_history_since(self, block_height: int, for_address: str) -> None:
+      """
+      Makes requests to Covalent, and only extracts transactions after `block_height`
+
+      Args:
+          block_height (int): _description_
+          for_address (str): _description_
+      """
+      latest_block_height = -1
+
+      # todo: new_block_height
+      new_block_height = 1
+      self._update_block_height(new_block_height, for_address)
+
     # Interface Implementation
 
     def flush(self) -> None:
@@ -105,19 +137,10 @@ class Extract(IExtract):
         # will follow. This avoids extracting all the transactions all the time.
         self._determine_block_height()
 
-        # * notes
-        # - possible to pull from a different blockchain if `chain_id` is different
-        # - `block_signed_at=false` pulls all transactions putting most recent ones
-        # at the top
-        COVALENT_TRANSACTIONS_URI = (
-            lambda address, page_number: f'https://api.covalenthq.com/v1/1/address/{address}/transactions_v2/?quote-currency=USD&format=JSON&block-signed-at-asc=false&no-logs=false&page-number={page_number}&key={os.environ["COVALENT_API_KEY"]}&page-size=100'
-        )
-
         # - check if the db has transactions, if it has, then download the new ones
         # if it doesn't have any transactions, download all
         # - we utilise a separate collection to track what raw transactions have
         # been extracted
         for addr in self._address:
-            ...
-
-        return
+            block_height = self._block_height[addr]
+            self._extract_txn_history_since(block_height, addr)
