@@ -1,4 +1,4 @@
-from typing import List, TypeVar
+from typing import Dict, List
 import os
 
 from interfaces.iextract import IExtract
@@ -26,7 +26,9 @@ class Extract(IExtract):
 
         self._address: List[str] = address
         # block number up to which the extraction has happened
-        self._block_height: List[int] = [0 for _ in self._address]
+        self._block_height: Dict[str, int] = dict(
+            zip(self._address, [0 for _ in self._address])
+        )
 
         self._db_name = "ethereum-indexer"
 
@@ -77,7 +79,7 @@ class Extract(IExtract):
         the new stuff. This is also helpful in case the binary raises and
         we need to restart it.
         """
-        for i, addr in enumerate(self._address):
+        for addr in self._address:
             block_height = self._db.get_any_item(
                 self._db_name, self._get_block_height_collection_name(addr)
             )
@@ -87,7 +89,7 @@ class Extract(IExtract):
             if block_height is None:
                 continue
 
-            self._block_height[i] = block_height
+            self._block_height[addr] = block_height
 
     # Interface Implementation
 
